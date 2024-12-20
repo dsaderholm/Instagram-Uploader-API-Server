@@ -1,45 +1,29 @@
 from instagrapi import Client
-import json
 import os
+import json
 
 class InstagramClient:
-    def __init__(self):
-        self.accounts = self._load_accounts()
-        self.clients = {}
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+        self.client = None
+        self._login()
 
-    def _load_accounts(self):
-        config_path = '/app/config/accounts.json'
-        with open(config_path, 'r') as f:
-            return json.load(f)
-
-    def _get_client(self, accountname):
-        if accountname not in self.clients:
-            if accountname not in self.accounts:
-                raise ValueError(f"Account {accountname} not configured")
-            
-            account = self.accounts[accountname]
-            client = Client()
-            session_file = f'/app/config/{accountname}_session.json'
-            
-            if os.path.exists(session_file):
-                client.load_settings(session_file)
-                client.login(account['username'], account['password'], relogin=True)
-            else:
-                client.login(account['username'], account['password'])
-                client.dump_settings(session_file)
-            
-            self.clients[accountname] = client
+    def _login(self):
+        self.client = Client()
+        session_file = f'/app/config/sessions/{self.username}.json'
         
-        return self.clients[accountname]
+        if os.path.exists(session_file):
+            try:
+                self.client.load_settings(session_file)
+                self.client.login(self.username, self.password, relogin=True)
+                return
+            except Exception:
+                pass
 
-    def upload_reel(self, accountname, video_path, caption):
-        client = self._get_client(accountname)
-        try:
-            media = client.clip_upload(video_path, caption=caption)
-            return {
-                'success': True,
-                'media_id': str(media.id),
-                'caption': caption
-            }
-        except Exception as e:
-            raise Exception(f"Failed to upload reel: {str(e)}")
+        self.client.login(self.username, self.password)
+        os.makedirs(os.path.dirname(session_file), exist_ok=True)
+        self.client.dump_settings(session_file)
+
+    def upload_reel(self, video_path, caption):
+        return self.client.clip_upload(video_path, caption=caption)

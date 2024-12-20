@@ -1,13 +1,11 @@
 version: '3.8'
+
 services:
-  reels-api:
+  instagram-reels:
     build: .
     ports:
       - "8769:8048"
     volumes:
       - ./config:/app/config
-      - ./uploads:/app/uploads
       - ./sounds:/app/sounds
-    environment:
-      - FLASK_ENV=production
     restart: unless-stopped

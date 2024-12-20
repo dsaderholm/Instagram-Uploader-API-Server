@@ -1,30 +1,29 @@
 import subprocess
+import tempfile
 import os
 
 class AudioProcessor:
-    def mix_audio(self, video_path, sound_path, mix_type='mix'):
-        output_path = f"{os.path.splitext(video_path)[0]}_with_sound.mp4"
-        
-        # Set volume levels based on mix type
-        if mix_type == 'background':
-            orig_vol = 1.0
-            sound_vol = 0.3
-        elif mix_type == 'main':
-            orig_vol = 0.3
-            sound_vol = 1.0
-        else:  # mix
-            orig_vol = 0.5
-            sound_vol = 0.5
+    def __init__(self):
+        self.volume_presets = {
+            'mix': ('0.5', '0.5'),
+            'background': ('0.8', '0.2'),
+            'main': ('0.2', '0.8')
+        }
 
-        # FFmpeg command to mix audio
+    def mix_audio(self, video_path, sound_path, volume_type='mix'):
+        if volume_type not in self.volume_presets:
+            volume_type = 'mix'
+
+        video_vol, sound_vol = self.volume_presets[volume_type]
+        output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4').name
+
         cmd = [
             'ffmpeg', '-i', video_path,
             '-i', sound_path,
             '-filter_complex',
-            f'[0:a]volume={orig_vol}[a1];[1:a]volume={sound_vol}[a2];[a1][a2]amix=inputs=2:duration=first[aout]',
+            f'[0:a]volume={video_vol}[a1];[1:a]volume={sound_vol}[a2];[a1][a2]amix=inputs=2:duration=first[aout]',
             '-map', '0:v', '-map', '[aout]',
-            '-c:v', 'copy',
-            '-shortest',
+            '-c:v', 'copy', '-c:a', 'aac',
             output_path
         ]
 
