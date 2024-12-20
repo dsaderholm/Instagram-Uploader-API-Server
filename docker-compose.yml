@@ -3,7 +3,7 @@ services:
   reels-api:
     build: .
     ports:
-      - "8048:8048"
+      - "8769:8048"
     volumes:
       - ./config:/app/config
       - ./uploads:/app/uploads
