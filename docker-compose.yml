@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  reels-api:
+    build: .
+    ports:
+      - "8048:8048"
+    volumes:
+      - ./config:/app/config
+      - ./uploads:/app/uploads
+      - ./sounds:/app/sounds
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
