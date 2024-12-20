@@ -2,3 +2,4 @@ flask==2.0.1
 instagrapi==1.16.30
 werkzeug==2.0.1
 Pillow>=8.1.1
+moviepy>=1.0.3

@@ -7,7 +7,11 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libpng-dev \
     zlib1g-dev \
+    imagemagick \
     && rm -rf /var/lib/apt/lists/*
+
+# Configure ImageMagick policy to allow video operations
+RUN sed -i 's/rights="none" pattern="@\*"/rights="read|write" pattern="@*"/' /etc/ImageMagick-6/policy.xml
 
 # Set working directory
 WORKDIR /app
