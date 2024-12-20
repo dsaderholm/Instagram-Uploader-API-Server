@@ -3,3 +3,4 @@ instagrapi==1.16.30
 pydub==0.25.1
 werkzeug==2.0.1
 python-magic==0.4.24
+Pillow>=8.1.1
