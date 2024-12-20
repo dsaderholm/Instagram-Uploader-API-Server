@@ -1,5 +1,13 @@
+# Core dependencies
 flask==2.0.1
-instagrapi==1.16.30
 werkzeug==2.0.1
+instagrapi==1.16.30
+
+# Image and video processing
 Pillow>=8.1.1
-moviepy>=1.0.3
+moviepy==1.0.3
+decorator>=4.4.2  # Required by moviepy
+numpy>=1.17.3    # Required by moviepy
+requests>=2.8.1  # Required by moviepy
+proglog>=0.1.9   # Required by moviepy
+tqdm>=4.11.2     # Required by moviepy

@@ -2,6 +2,15 @@ from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 import os
 import json
+import moviepy.editor as mp  # Explicitly import moviepy
+import sys
+
+# Print Python path and installed packages for debugging
+print("Python Path:", sys.path)
+print("Installed Packages:")
+import pkg_resources
+for package in pkg_resources.working_set:
+    print(f"{package.key} - Version: {package.version}")
 from instagram_client import InstagramClient
 from audio_processor import AudioProcessor
 import tempfile
