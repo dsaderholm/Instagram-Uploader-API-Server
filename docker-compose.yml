@@ -1,18 +1,19 @@
-version: '3.8'
-services:
-  instagram-reels:
-    build: .
-    ports:
-      - "8769:8048"
-    volumes:
-      - ./config:/app/config
-      - ./sounds:/app/sounds
-    restart: unless-stopped
-    networks:
-      video_generation:
-        ipv4_address: 10.20.0.12  # Different IP from previous services
-
 networks:
   video_generation:
     external: true
-    name: "Video Generation"
+    name: Video Generation
+services:
+  instagram-reels:
+    build: .
+    networks:
+      video_generation:
+        ipv4_address: 10.20.0.12
+    ports:
+    - 8769:8048
+    restart: unless-stopped
+    volumes:
+    - instagram-uploader_instagram-reels_sounds:/app/sounds
+version: '3.8'
+volumes:
+  instagram-uploader_instagram-reels_sounds:
+    name: instagram-uploader_instagram-reels_sounds
