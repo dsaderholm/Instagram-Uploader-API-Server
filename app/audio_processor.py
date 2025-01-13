@@ -18,7 +18,8 @@ class AudioProcessor:
         output_path = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4').name
 
         cmd = [
-            'ffmpeg', '-i', video_path,
+            'ffmpeg', '-y',  # Added -y flag to force overwrite
+            '-i', video_path,
             '-i', sound_path,
             '-filter_complex',
             f'[0:a]volume={video_vol}[a1];[1:a]volume={sound_vol}[a2];[a1][a2]amix=inputs=2:duration=first[aout]',
@@ -27,5 +28,9 @@ class AudioProcessor:
             output_path
         ]
 
-        subprocess.run(cmd, check=True)
-        return output_path
+        try:
+            subprocess.run(cmd, check=True, capture_output=True, text=True)
+            return output_path
+        except subprocess.CalledProcessError as e:
+            print(f"FFmpeg Error: {e.stderr}")
+            raise
