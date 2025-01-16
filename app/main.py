@@ -50,6 +50,18 @@ def cleanup_temp_files(files):
         except Exception as e:
             logger.error(f"Error cleaning up {file_path}: {str(e)}")
 
+def find_sound_file(sound_name):
+    """Find a sound file regardless of case or spaces"""
+    sounds_dir = '/app/sounds'
+    try:
+        for filename in os.listdir(sounds_dir):
+            if filename.lower().rsplit('.', 1)[0] == sound_name.lower():
+                return os.path.join(sounds_dir, filename)
+        return None
+    except Exception as e:
+        logger.error(f"Error searching for sound file: {str(e)}")
+        return None
+
 @app.route('/upload', methods=['POST'])
 def upload_video():
     temp_files = []  # Keep track of temporary files to clean up
@@ -105,8 +117,9 @@ def upload_video():
         # Process audio if sound is specified
         final_video_path = temp_video.name
         if sound_name:
-            sound_path = f'/app/sounds/{sound_name}.mp3'
-            if not os.path.exists(sound_path):
+            sound_path = find_sound_file(sound_name)
+            if not sound_path:
+                logger.error(f"Sound file not found for name: {sound_name}")
                 return jsonify({'error': f'Sound file not found: {sound_name}'}), 404
             
             try:
@@ -157,4 +170,4 @@ def upload_video():
         cleanup_temp_files(temp_files)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8048)
+    app.run(host='0.0.0.0', port=8048, debug=True)
