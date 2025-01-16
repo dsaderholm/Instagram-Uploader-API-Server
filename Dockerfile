@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 # Install system dependencies and Python tools
 RUN apt-get update && apt-get install -y \
@@ -11,10 +11,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# Install Python dependencies
+# Set working directory
+WORKDIR /app
+
+# Copy requirements first for better caching
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir moviepy>=1.0.3
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Configure ImageMagick policy
 RUN if [ -f /etc/ImageMagick-6/policy.xml ]; then \
@@ -23,20 +27,25 @@ RUN if [ -f /etc/ImageMagick-6/policy.xml ]; then \
     sed -i 's/rights="none" pattern="@\*"/rights="read|write" pattern="@*"/' /etc/ImageMagick/policy.xml; \
     fi
 
-# Set working directory
-WORKDIR /app
-
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Create necessary directories
+RUN mkdir -p /app/config/sessions /tmp/uploads
 
 # Copy application code
 COPY app/ ./app/
 COPY config/ ./config/
 COPY sounds/ ./sounds/
 
-# Create necessary directories
-RUN mkdir -p /app/config/sessions
+# Set permissions
+RUN chmod -R 755 /app && \
+    chmod -R 777 /tmp/uploads /app/config/sessions
+
+# Run the application with lower privileges
+USER 1000:1000
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/home/user/.local/bin:$PATH"
 
 # Run the application
 CMD ["python", "app/main.py"]
