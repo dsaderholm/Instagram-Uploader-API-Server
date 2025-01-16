@@ -54,9 +54,22 @@ def find_sound_file(sound_name):
     """Find a sound file regardless of case or spaces"""
     sounds_dir = '/app/sounds'
     try:
-        for filename in os.listdir(sounds_dir):
-            if filename.lower().rsplit('.', 1)[0] == sound_name.lower():
-                return os.path.join(sounds_dir, filename)
+        # Strip any quotes from the sound name
+        sound_name = sound_name.strip("'\"")
+        logger.info(f"Looking for sound file with name: {sound_name}")
+        
+        # List all files in the sounds directory
+        files = os.listdir(sounds_dir)
+        logger.info(f"Available sound files: {files}")
+        
+        for filename in files:
+            base_name = filename.lower().rsplit('.', 1)[0]
+            logger.info(f"Comparing {base_name} with {sound_name.lower()}")
+            if base_name == sound_name.lower():
+                full_path = os.path.join(sounds_dir, filename)
+                logger.info(f"Found matching sound file: {full_path}")
+                return full_path
+        logger.error(f"No matching sound file found for {sound_name}")
         return None
     except Exception as e:
         logger.error(f"Error searching for sound file: {str(e)}")
