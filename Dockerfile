@@ -27,6 +27,9 @@ RUN if [ -f /etc/ImageMagick-6/policy.xml ]; then \
     sed -i 's/rights="none" pattern="@\*"/rights="read|write" pattern="@*"/' /etc/ImageMagick/policy.xml; \
     fi
 
+# Create user
+RUN useradd -u 1000 -m appuser
+
 # Create necessary directories
 RUN mkdir -p /app/config/sessions /tmp/uploads
 
@@ -35,17 +38,18 @@ COPY app/ ./app/
 COPY config/ ./config/
 COPY sounds/ ./sounds/
 
-# Set permissions
-RUN chmod -R 755 /app && \
+# Set permissions (make sure appuser owns everything)
+RUN chown -R appuser:appuser /app && \
+    chmod -R 755 /app && \
     chmod -R 777 /tmp/uploads /app/config/sessions
 
 # Run the application with lower privileges
-USER 1000:1000
+USER appuser
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PATH="/home/user/.local/bin:$PATH"
+    PATH="/home/appuser/.local/bin:$PATH"
 
 # Run the application
 CMD ["python", "app/main.py"]
