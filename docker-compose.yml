@@ -14,7 +14,6 @@ services:
     volumes:
     - instagram-uploader_instagram-reels_sounds:/app/sounds
     - instagram-uploader_instagram-reels_config:/app/config  # Added this line to mount config directory
-version: '3.8'
 volumes:
   instagram-uploader_instagram-reels_sounds:
     name: instagram-uploader_instagram-reels_sounds

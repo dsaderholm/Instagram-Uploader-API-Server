@@ -20,12 +20,10 @@ WORKDIR /app
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install Python dependencies with specific version constraints
-RUN pip install --no-cache-dir moviepy==1.0.3 && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir instagrapi==2.0.0 && \
-    # Verify and force moviepy version
-    pip install --no-cache-dir moviepy==1.0.3 --no-deps
+# Install Python dependencies with verbose output to see errors
+RUN pip install --no-cache-dir moviepy==1.0.3 || { echo "Error installing moviepy"; exit 1; } && \
+    pip install --no-cache-dir -r requirements.txt || { echo "Error installing requirements"; exit 1; } && \
+    pip install --no-cache-dir instagrapi==2.0.0 || { echo "Error installing instagrapi"; exit 1; }
 
 # Configure ImageMagick policy
 RUN if [ -f /etc/ImageMagick-6/policy.xml ]; then \
