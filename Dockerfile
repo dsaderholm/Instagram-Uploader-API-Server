@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir --upgrade pip setuptools wheel
 
+# Create user early
+RUN useradd -u 1000 -m appuser
+
 # Set working directory
 WORKDIR /app
 
@@ -27,21 +30,19 @@ RUN if [ -f /etc/ImageMagick-6/policy.xml ]; then \
     sed -i 's/rights="none" pattern="@\*"/rights="read|write" pattern="@*"/' /etc/ImageMagick/policy.xml; \
     fi
 
-# Create user
-RUN useradd -u 1000 -m appuser
-
-# Create necessary directories
-RUN mkdir -p /app/config/sessions /tmp/uploads
+# Create necessary directories with correct ownership
+RUN mkdir -p /app/config/sessions /tmp/uploads && \
+    chown -R appuser:appuser /app/config/sessions /tmp/uploads
 
 # Copy application code
 COPY app/ ./app/
 COPY config/ ./config/
 COPY sounds/ ./sounds/
 
-# Set permissions (make sure appuser owns everything)
+# Set all permissions
 RUN chown -R appuser:appuser /app && \
     chmod -R 755 /app && \
-    chmod -R 777 /tmp/uploads /app/config/sessions
+    chmod 777 /app/config/sessions  # Make sessions directory writable by all
 
 # Run the application with lower privileges
 USER appuser
