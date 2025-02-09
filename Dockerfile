@@ -21,7 +21,8 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir moviepy>=1.0.3  # Explicitly install moviepy again
 
 # Configure ImageMagick policy
 RUN if [ -f /etc/ImageMagick-6/policy.xml ]; then \
@@ -30,9 +31,9 @@ RUN if [ -f /etc/ImageMagick-6/policy.xml ]; then \
     sed -i 's/rights="none" pattern="@\*"/rights="read|write" pattern="@*"/' /etc/ImageMagick/policy.xml; \
     fi
 
-# Create necessary directories with correct ownership
-RUN mkdir -p /app/config/sessions /tmp/uploads && \
-    chown -R appuser:appuser /app/config/sessions /tmp/uploads
+# Create necessary directories
+RUN mkdir -p /tmp/uploads && \
+    chown -R appuser:appuser /tmp/uploads
 
 # Copy application code
 COPY app/ ./app/
@@ -40,9 +41,7 @@ COPY config/ ./config/
 COPY sounds/ ./sounds/
 
 # Set all permissions
-RUN chown -R appuser:appuser /app && \
-    chmod -R 755 /app && \
-    chmod 777 /app/config/sessions  # Make sessions directory writable by all
+RUN chown -R appuser:appuser /app
 
 # Run the application with lower privileges
 USER appuser
