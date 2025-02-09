@@ -151,7 +151,9 @@ def upload_video():
         # Prepare caption with hashtags
         caption = description
         if hashtags and hashtags[0]:  # Only add hashtags if the list is not empty and first element is not empty
-            caption += ' ' + ' '.join(f'#{tag.strip()}' for tag in hashtags if tag.strip())
+            # Remove any existing '#' from the hashtags before adding them
+            cleaned_hashtags = [tag.strip().lstrip('#') for tag in hashtags if tag.strip()]
+            caption += ' ' + ' '.join(f'#{tag}' for tag in cleaned_hashtags)
 
         # Upload to Instagram
         try:
