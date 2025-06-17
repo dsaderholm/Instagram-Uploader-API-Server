@@ -12,10 +12,7 @@ services:
     - 8769:8048
     restart: unless-stopped
     volumes:
-    - instagram-uploader_instagram-reels_sounds:/app/sounds
     - instagram-uploader_instagram-reels_config:/app/config  # Added this line to mount config directory
 volumes:
-  instagram-uploader_instagram-reels_sounds:
-    name: instagram-uploader_instagram-reels_sounds
   instagram-uploader_instagram-reels_config:
     name: instagram-uploader_instagram-reels_config

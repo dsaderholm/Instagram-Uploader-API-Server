@@ -4,7 +4,7 @@ import os
 import json
 import sys
 from instagram_client import InstagramClient
-from audio_processor import AudioProcessor
+
 import tempfile
 import logging
 import traceback
@@ -50,30 +50,7 @@ def cleanup_temp_files(files):
         except Exception as e:
             logger.error(f"Error cleaning up {file_path}: {str(e)}")
 
-def find_sound_file(sound_name):
-    """Find a sound file regardless of case or spaces"""
-    sounds_dir = '/app/sounds'
-    try:
-        # Strip any quotes from the sound name
-        sound_name = sound_name.strip("'\"")
-        logger.info(f"Looking for sound file with name: {sound_name}")
-        
-        # List all files in the sounds directory
-        files = os.listdir(sounds_dir)
-        logger.info(f"Available sound files: {files}")
-        
-        for filename in files:
-            base_name = filename.lower().rsplit('.', 1)[0]
-            logger.info(f"Comparing {base_name} with {sound_name.lower()}")
-            if base_name == sound_name.lower():
-                full_path = os.path.join(sounds_dir, filename)
-                logger.info(f"Found matching sound file: {full_path}")
-                return full_path
-        logger.error(f"No matching sound file found for {sound_name}")
-        return None
-    except Exception as e:
-        logger.error(f"Error searching for sound file: {str(e)}")
-        return None
+
 
 @app.route('/upload', methods=['POST'])
 def upload_video():
@@ -99,8 +76,6 @@ def upload_video():
         description = request.form.get('description', '')
         accountname = request.form.get('accountname')
         hashtags = request.form.get('hashtags', '').split(',') if request.form.get('hashtags') else []
-        sound_name = request.form.get('sound_name')
-        sound_aud_vol = request.form.get('sound_aud_vol', 'mix')
 
         if not accountname:
             return jsonify({'error': 'Account name is required'}), 400
@@ -127,26 +102,8 @@ def upload_video():
             logger.error(f"Error saving video file: {str(e)}")
             return jsonify({'error': 'Error saving video file'}), 500
 
-        # Process audio if sound is specified
+        # Use the original video without audio processing
         final_video_path = temp_video.name
-        if sound_name:
-            sound_path = find_sound_file(sound_name)
-            if not sound_path:
-                logger.error(f"Sound file not found for name: {sound_name}")
-                return jsonify({'error': f'Sound file not found: {sound_name}'}), 404
-            
-            try:
-                processor = AudioProcessor()
-                final_video_path = processor.mix_audio(
-                    temp_video.name,
-                    sound_path,
-                    sound_aud_vol
-                )
-                temp_files.append(final_video_path)
-                logger.info(f"Audio processing completed: {final_video_path}")
-            except Exception as e:
-                logger.error(f"Error processing audio: {str(e)}")
-                return jsonify({'error': f'Error processing audio: {str(e)}'}), 500
 
         # Prepare caption with hashtags
         caption = description

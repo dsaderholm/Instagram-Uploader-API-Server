@@ -2,7 +2,6 @@ FROM python:3.11-slim
 
 # Install system dependencies and Python tools
 RUN apt-get update && apt-get install -y \
-    ffmpeg \
     python3-dev \
     libjpeg-dev \
     libpng-dev \
@@ -39,7 +38,6 @@ RUN mkdir -p /tmp/uploads && \
 # Copy application code
 COPY app/ ./app/
 COPY config/ ./config/
-COPY sounds/ ./sounds/
 
 # Set all permissions
 RUN chown -R appuser:appuser /app
