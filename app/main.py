@@ -1,10 +1,8 @@
 from flask import Flask, request, jsonify
-from werkzeug.utils import secure_filename
 import os
 import json
 import sys
 from instagram_client import InstagramClient
-
 import tempfile
 import logging
 import traceback
@@ -104,7 +102,7 @@ def upload_video():
         # Use the original video without audio processing
         final_video_path = temp_video.name
 
-        # Use description as-is without hashtag processing
+        # Use description as caption
         caption = description
 
         # Upload to Instagram
