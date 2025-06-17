@@ -75,7 +75,6 @@ def upload_video():
         # Get and validate parameters
         description = request.form.get('description', '')
         accountname = request.form.get('accountname')
-        hashtags = request.form.get('hashtags', '').split(',') if request.form.get('hashtags') else []
 
         if not accountname:
             return jsonify({'error': 'Account name is required'}), 400
@@ -105,12 +104,8 @@ def upload_video():
         # Use the original video without audio processing
         final_video_path = temp_video.name
 
-        # Prepare caption with hashtags
+        # Use description as-is without hashtag processing
         caption = description
-        if hashtags and hashtags[0]:  # Only add hashtags if the list is not empty and first element is not empty
-            # Remove any existing '#' from the hashtags before adding them
-            cleaned_hashtags = [tag.strip().lstrip('#') for tag in hashtags if tag.strip()]
-            caption += ' ' + ' '.join(f'#{tag}' for tag in cleaned_hashtags)
 
         # Upload to Instagram
         try:
