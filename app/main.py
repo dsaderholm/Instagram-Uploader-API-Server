@@ -6,6 +6,7 @@ from instagram_client import InstagramClient
 import tempfile
 import logging
 import traceback
+import threading
 
 # Set up logging
 logging.basicConfig(
@@ -15,6 +16,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
+# Global lock to prevent concurrent uploads
+upload_lock = threading.Lock()
+upload_in_progress = False
 
 # Configuration
 UPLOAD_FOLDER = '/tmp/uploads'
@@ -48,10 +53,25 @@ def cleanup_temp_files(files):
         except Exception as e:
             logger.error(f"Error cleaning up {file_path}: {str(e)}")
 
-
+@app.route('/status', methods=['GET'])
+def get_status():
+    """Get current upload status"""
+    return jsonify({
+        "upload_in_progress": upload_in_progress,
+        "service": "Instagram Uploader API"
+    }), 200
 
 @app.route('/upload', methods=['POST'])
 def upload_video():
+    global upload_in_progress
+    
+    # Check if upload is already in progress
+    with upload_lock:
+        if upload_in_progress:
+            logger.warning("Upload already in progress, rejecting request")
+            return jsonify({"error": "Upload already in progress. Please wait."}), 429
+        upload_in_progress = True
+    
     temp_files = []  # Keep track of temporary files to clean up
 
     try:
@@ -131,6 +151,10 @@ def upload_video():
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
     
     finally:
+        # Always reset the upload flag
+        with upload_lock:
+            upload_in_progress = False
+            
         # Cleanup temporary files
         cleanup_temp_files(temp_files)
 
